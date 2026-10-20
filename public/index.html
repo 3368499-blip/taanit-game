@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4e8c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="תענית פרק א'">
+<meta property="og:title" content="מסכת תענית פרק א' – משחק חזרה">
+<meta property="og:description" content="משחק חזרה על פשט המשניות – תלמוד תורה אהבת ישראל">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231f4e8c'/%3E%3Cpath d='M32 12C24 24 19 31 19 38a13 13 0 0 0 26 0c0-7-5-14-13-26z' fill='%23cfe3f7'/%3E%3C/svg%3E">
+<title>מסכת תענית – פרק א'</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+[hidden]{display:none!important}
+html,body{height:auto}
+/* Layout: one centered card; the chapter's rain calendar on the start screen, a rain gauge track during the quiz, a well that fills on the end screen */
+:root{
+  --sand:#f3e7cf; --sand-deep:#e6d2a8; --ink:#2b2116; --ink-soft:#6b5a43;
+  --card:#fffaf0; --line:#dcc79e;
+  --tekhelet:#1f4e8c; --tekhelet-soft:#dde7f5;
+  --copper:#b8621b; --copper-hover:#9a4f12;
+  --good:#2f7d3a; --good-bg:#dcf0d9; --bad:#b3261e; --bad-bg:#f8dcd8;
+  --f-display:"Suez One","Frank Ruhl Libre",Georgia,serif;
+  --f-body:"Assistant","Segoe UI",Tahoma,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sand:#1d1813; --sand-deep:#2a221a; --ink:#f1e6d2; --ink-soft:#b9a687;
+  --card:#26201a; --line:#4a3d2d;
+  --tekhelet:#8fb3ea; --tekhelet-soft:#22324a;
+  --copper:#e08a3c; --copper-hover:#f09d52;
+  --good:#7fcf86; --good-bg:#1f3a22; --bad:#f08b80; --bad-bg:#45201c;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --sand:#1d1813; --sand-deep:#2a221a; --ink:#f1e6d2; --ink-soft:#b9a687;
+  --card:#26201a; --line:#4a3d2d;
+  --tekhelet:#8fb3ea; --tekhelet-soft:#22324a;
+  --copper:#e08a3c; --copper-hover:#f09d52;
+  --good:#7fcf86; --good-bg:#1f3a22; --bad:#f08b80; --bad-bg:#45201c;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{direction:rtl}
+body{
+  margin:0; font-family:var(--f-body); font-size:18px; line-height:1.55;
+  color:var(--ink); background:var(--sand);
+  background-image:
+    radial-gradient(120% 60% at 50% 115%, var(--sand-deep) 0 45%, transparent 46%),
+    radial-gradient(90% 40% at 0% 110%, var(--sand-deep) 0 40%, transparent 41%);
+  background-attachment:fixed;
+  min-height:100%; padding-inline:16px; padding-block:20px 40px;
+}
+.wrap{max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+h1,h2{font-family:var(--f-display); font-weight:400; text-wrap:balance; margin:0; line-height:1.25}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem); color:var(--tekhelet)}
+h2{font-size:clamp(1.3rem,3.6vw,1.7rem); color:var(--tekhelet)}
+p{margin:0}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:clamp(18px,4vw,30px); box-shadow:0 8px 30px rgb(60 40 10 / .12)}
+.muted{color:var(--ink-soft)}
+.btn{
+  font:inherit; font-weight:800; font-size:1.05rem; cursor:pointer;
+  background:var(--copper); color:#fff; border:0; border-radius:10px; padding:12px 26px;
+  transition:background .2s, transform .1s;
+}
+.btn:hover{background:var(--copper-hover)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent; color:var(--tekhelet); border:2px solid var(--tekhelet)}
+.btn.ghost:hover{background:var(--tekhelet-soft)}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--tekhelet); outline-offset:2px}
+.row{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+
+/* school logo, on every screen; smaller during the quiz */
+.brand{display:flex; justify-content:center}
+.brand img{height:clamp(132px,34vw,170px); width:auto; max-width:100%; display:block; background:#fff; border-radius:14px; padding:6px; box-shadow:0 4px 16px rgb(60 40 10 / .12); transition:height .3s ease}
+body.in-quiz .brand img{height:clamp(88px,22vw,110px)}
+
+/* account, leaderboard, admin */
+.account{width:100%; border:2px solid var(--line); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; text-align:right}
+.tabs{display:flex; gap:6px}
+.tabs button{font:inherit; font-weight:700; flex:1; cursor:pointer; background:transparent; color:var(--ink-soft); border:0; border-bottom:3px solid var(--line); padding:6px}
+.tabs button[aria-pressed="true"]{color:var(--tekhelet); border-bottom-color:var(--tekhelet)}
+.acct-form{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end}
+.acct-form label{display:flex; flex-direction:column; gap:4px; font-size:.88rem; font-weight:700; color:var(--ink-soft); min-width:0}
+.acct-form input,.mini-in,#admin-code{font:inherit; font-size:1rem; color:var(--ink); background:var(--card); border:2px solid var(--line); border-radius:8px; padding:8px 10px; width:100%; min-width:0}
+.acct-form input:focus,.mini-in:focus,#admin-code:focus{outline:none; border-color:var(--tekhelet)}
+.acct-form .btn{padding:10px 18px; margin:0}
+.acct-hint{font-size:.85rem; color:var(--ink-soft)}
+.acct-msg{font-size:.92rem; font-weight:700; min-height:1.2em}
+.acct-msg.err{color:var(--bad)} .acct-msg.ok{color:var(--good)}
+.acct-in{display:flex; flex-wrap:wrap; gap:6px 12px; align-items:center; justify-content:space-between}
+.link{font:inherit; background:none; border:0; color:var(--tekhelet); text-decoration:underline; cursor:pointer; padding:2px}
+.board{width:100%; text-align:right; display:flex; flex-direction:column; gap:6px}
+.board h2{text-align:center}
+.board-sub{text-align:center; font-size:.85rem}
+.board ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.board li{display:grid; grid-template-columns:2.2em 1fr auto; gap:10px; align-items:center; padding:7px 12px; border-radius:8px; background:var(--sand); font-variant-numeric:tabular-nums}
+.board li:nth-child(-n+3) .pl{background:var(--copper); color:#fff}
+.board .pl{width:1.9em; height:1.9em; border-radius:50%; display:grid; place-items:center; font-weight:800; background:var(--sand-deep); color:var(--ink-soft); font-size:.9rem}
+.board .nm{font-weight:700; min-width:0; overflow-wrap:anywhere}
+.board .pt{font-weight:800; color:var(--tekhelet)}
+.board li.mine{outline:2px solid var(--tekhelet); background:var(--tekhelet-soft)}
+.board li.empty{display:block; text-align:center; color:var(--ink-soft)}
+.save-line{font-weight:700; min-height:1.3em}
+.save-line.ok{color:var(--good)} .save-line.err{color:var(--bad)}
+.admin-link-row{display:flex; justify-content:center}
+#admin{display:flex; flex-direction:column; gap:14px}
+#admin-form{display:flex; gap:10px; flex-wrap:wrap; align-items:end}
+#admin-form label{display:flex; flex-direction:column; gap:4px; font-weight:700; color:var(--ink-soft); flex:1; min-width:160px}
+#admin-form .btn{margin:0}
+.admin-bar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between}
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px}
+.admin-table{border-collapse:collapse; width:100%; font-size:.95rem; min-width:560px}
+.admin-table th,.admin-table td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
+.admin-table th{background:var(--sand-deep); font-size:.85rem}
+.admin-table .num{font-variant-numeric:tabular-nums}
+.admin-table .empty{text-align:center; color:var(--ink-soft)}
+.mini{font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; border:1.5px solid var(--tekhelet); color:var(--tekhelet); background:transparent; border-radius:6px; padding:3px 8px}
+.mini.danger{border-color:var(--bad); color:var(--bad)}
+.admin-table tr.open td{background:var(--tekhelet-soft)}
+.admin-table td.detail{white-space:normal; background:var(--sand); padding:10px 14px}
+.hist{border-collapse:collapse; width:100%; font-size:.88rem}
+.hist th,.hist td{padding:5px 8px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap}
+.hist td.wr{white-space:normal}
+.qn{display:inline-block; min-width:1.8em; text-align:center; padding:0 4px; margin:1px; border-radius:4px; background:var(--bad-bg); color:var(--bad); font-weight:700; cursor:help}
+.hard{margin-bottom:8px}
+@media (max-width:420px){.acct-form{grid-template-columns:1fr}}
+
+/* start */
+.hero{display:flex; flex-direction:column; gap:14px; text-align:center; align-items:center}
+.modes{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; width:100%}
+.mode{font:inherit; text-align:right; cursor:pointer; background:var(--card); color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:12px 14px}
+.mode[aria-pressed="true"]{border-color:var(--tekhelet); background:var(--tekhelet-soft)}
+.mode b{display:block; color:var(--tekhelet)}
+.mode small{color:var(--ink-soft); font-size:.88rem}
+.resume{font-size:.95rem}
+
+/* quiz */
+.bar{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:.95rem; color:var(--ink-soft); font-variant-numeric:tabular-nums}
+.bar b{color:var(--ink)}
+.q{font-size:1.25rem; font-weight:800; color:var(--tekhelet); margin-block:14px}
+.opts{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.opt{
+  font:inherit; width:100%; text-align:right; cursor:pointer;
+  background:var(--card); color:var(--ink); border:2px solid var(--line); border-radius:10px;
+  padding:10px 14px; display:flex; gap:10px; align-items:flex-start; transition:border-color .15s, background .15s;
+}
+.opt:hover:not(:disabled){border-color:var(--tekhelet); background:var(--tekhelet-soft)}
+.opt:disabled{cursor:default}
+.opt .k{flex:none; width:1.7em; height:1.7em; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:.85rem; background:var(--sand-deep); color:var(--ink-soft)}
+.opt .t{min-width:0}
+.opt.right{border-color:var(--good); background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad); background:var(--bad-bg)}
+.opt.dim{opacity:.55}
+.fb{font-weight:800; font-size:1.1rem; min-height:1.6em}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+.foot{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+.hint{font-size:.85rem; color:var(--ink-soft)}
+
+/* end */
+.score{font-family:var(--f-display); font-size:clamp(2.4rem,9vw,3.6rem); color:var(--copper); line-height:1; font-variant-numeric:tabular-nums}
+.stars{font-size:2rem; letter-spacing:.15em; color:var(--copper)}
+.review{display:flex; flex-direction:column; gap:10px; text-align:right}
+.review details{border:1px solid var(--line); border-radius:10px; padding:10px 14px; background:var(--card)}
+.review summary{cursor:pointer; font-weight:700; color:var(--tekhelet)}
+.review p{margin-top:6px}
+
+@keyframes pop{0%{transform:scale(.97)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
+.pop{animation:pop .3s ease}
+
+/* chapter calendar (start), rain track (quiz), well (end) */
+.timeline{list-style:none; margin:0; padding:0; width:100%; text-align:right; display:flex; flex-direction:column; position:relative}
+.timeline::before{content:""; position:absolute; top:10px; bottom:10px; inset-inline-start:7px; width:3px; background:linear-gradient(var(--tekhelet-soft), var(--tekhelet)); border-radius:3px}
+.timeline li{position:relative; padding-inline-start:28px; padding-block:5px; display:flex; flex-direction:column}
+.timeline li::before{content:""; position:absolute; inset-inline-start:2px; top:12px; width:13px; height:13px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:var(--tekhelet)}
+.timeline b{color:var(--tekhelet); font-size:.95rem}
+.timeline span{color:var(--ink-soft); font-size:.92rem; min-width:0}
+.cal-title{font-family:var(--f-display); color:var(--copper); font-size:1.1rem; text-align:center}
+.track{list-style:none; margin:10px 0 0; padding:0; display:flex; justify-content:space-between; position:relative; --fill:0%}
+.track::before,.track::after{content:""; position:absolute; top:6px; height:4px; border-radius:4px; inset-inline-start:0}
+.track::before{inset-inline-end:0; background:var(--sand-deep)}
+.track::after{width:var(--fill); background:var(--tekhelet); transition:width .4s ease}
+.track li{position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; min-width:0}
+.track i{width:16px; height:16px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:var(--card); border:2px solid var(--line); transition:background .3s, border-color .3s}
+.track li.on i{background:var(--tekhelet); border-color:var(--tekhelet)}
+.track span{font-size:.62rem; color:var(--ink-soft); text-align:center; line-height:1.15}
+.track li.on span{color:var(--tekhelet); font-weight:700}
+@media (max-width:560px){.track span{display:none}}
+.qlabel{display:inline-block; margin-top:14px; font-size:.85rem; font-weight:800; color:var(--tekhelet); background:var(--tekhelet-soft); border-radius:99px; padding:2px 12px}
+.qlabel.concept{color:var(--copper); background:color-mix(in srgb, var(--copper) 14%, transparent)}
+.q{margin-top:8px}
+.well{display:flex; flex-direction:column; align-items:center; gap:6px}
+.well svg{width:120px; height:auto}
+.well #well-water{--level:0%}
+.well .water{transform-origin:bottom; transform:scaleY(var(--level)); transition:transform 1.2s ease; transform-box:fill-box}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+@media (max-width:440px){body{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand"><img src="logo.jpg" alt="אהבת ישראל – חיבור לתורה, מעוף קדימה. תלמוד תורה חרד״ל" width="382" height="440"></header>
+  <!-- start -->
+  <section class="card hero" id="start">
+    <h1>מסכת תענית – פרק א'</h1>
+    <p class="muted">משחק חזרה על פשט המשניות. בכל סבב 25 שאלות על המשניות ו־7 מושגי יסוד מהפרק.</p>
+    <div class="account" id="account" hidden>
+      <div id="acct-out">
+        <form class="acct-form" id="acct-form" novalidate>
+          <label>שם ושם משפחה <input id="acct-name" autocomplete="name" maxlength="30" placeholder="למשל: יוסף כהן"></label>
+          <button class="btn" type="submit" id="acct-submit">כניסה למשחק</button>
+        </form>
+        <p class="acct-hint">בפעם הבאה כתבו בדיוק אותו שם, והנקודות ימשיכו להצטבר.</p>
+        <p class="acct-msg" id="acct-msg" role="status" aria-live="polite"></p>
+      </div>
+      <div class="acct-in" id="acct-in" hidden>
+        <span>שלום, <b id="me-name"></b> · הניקוד שלך: <b id="me-total"></b></span>
+        <button class="link" id="logout" type="button">יציאה</button>
+      </div>
+    </div>
+    <p class="cal-title">לוח הזמנים של הפרק</p>
+    <ol class="timeline" id="timeline"></ol>
+    <div class="row" style="justify-content:center">
+      <button class="btn" id="start-btn">התחל במשחק</button>
+      <button class="btn ghost" id="resume-btn" hidden>המשך מאיפה שעצרתי</button>
+    </div>
+    <p class="resume muted" id="resume-line" hidden></p>
+    <div class="board" data-board hidden>
+      <h2>טבלת האלופים</h2>
+      <p class="board-sub muted"></p>
+      <ol></ol>
+    </div>
+    <div class="admin-link-row"><button class="link" id="admin-link" type="button" hidden>כניסת מנהל</button></div>
+  </section>
+
+  <!-- quiz -->
+  <section class="card" id="quiz" hidden>
+    <div class="bar"><span id="prog"></span><span>נקודות: <b id="pts">0</b> · ברצף: <b id="streak">0</b></span></div>
+    <ol class="track" id="track" aria-label="ההתקדמות בסבב לפי לוח הזמנים של הפרק"></ol>
+    <span class="qlabel" id="qlabel"></span>
+    <div class="q" id="qtext"></div>
+    <ul class="opts" id="opts"></ul>
+    <div class="fb" id="fb" role="status" aria-live="polite"></div>
+    <div class="foot">
+      <span class="hint">אפשר לענות גם במקשים 1–4</span>
+      <button class="btn" id="next-btn" hidden>לשאלה הבאה</button>
+    </div>
+  </section>
+
+  <!-- end -->
+  <section class="card hero" id="end" hidden>
+    <h1>כל הכבוד! סיימת בהצלחה את המשחק!</h1>
+    <p class="muted">סיימת סבב חזרה על מסכת תענית פרק א'. אשריכם תלמידי תלמוד תורה אהבת ישראל!</p>
+    <div class="stars" id="stars" aria-hidden="true"></div>
+    <div class="score" id="final"></div>
+    <p class="muted" id="final-line"></p>
+    <p class="save-line" id="save-line" role="status" aria-live="polite"></p>
+    <div class="well" aria-hidden="true">
+      <svg viewBox="0 0 120 110"><defs><clipPath id="well-clip"><path d="M18 22h84v70a12 12 0 0 1-12 12H30a12 12 0 0 1-12-12z"/></clipPath></defs>
+        <path d="M18 22h84v70a12 12 0 0 1-12 12H30a12 12 0 0 1-12-12z" fill="var(--sand-deep)"/>
+        <g clip-path="url(#well-clip)" id="well-water"><rect class="water" x="18" y="22" width="84" height="82" fill="var(--tekhelet)" opacity=".85"/></g>
+        <path d="M18 22h84v70a12 12 0 0 1-12 12H30a12 12 0 0 1-12-12z" fill="none" stroke="var(--ink-soft)" stroke-width="3"/>
+        <path d="M10 22h100" stroke="var(--ink-soft)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M60 2c-5 8-8 12-8 16a8 8 0 0 0 16 0c0-4-3-8-8-16z" fill="var(--tekhelet)"/></svg>
+      <p class="muted" id="well-cap"></p>
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" id="again-btn">שחק שוב</button>
+      <button class="btn ghost" id="mistakes-btn" hidden>תרגול רק על הטעויות</button>
+    </div>
+    <div class="board" data-board hidden>
+      <h2>טבלת האלופים</h2>
+      <p class="board-sub muted"></p>
+      <ol></ol>
+    </div>
+    <div class="review" id="review" hidden>
+      <h2>שאלות לחזרה</h2>
+      <div id="review-list" class="review"></div>
+    </div>
+  </section>
+
+  <!-- admin -->
+  <section class="card" id="admin" hidden>
+    <div class="admin-bar"><h2>מסך המנהל</h2><button class="btn ghost" id="admin-back" type="button">חזרה למשחק</button></div>
+    <form id="admin-login" novalidate>
+      <div id="admin-form">
+        <label>קוד מנהל <input id="admin-code" type="password" inputmode="numeric" autocomplete="off"></label>
+        <button class="btn" type="submit">כניסה</button>
+      </div>
+    </form>
+    <div id="admin-panel" hidden>
+      <div class="admin-bar"><span class="muted" id="admin-count"></span><span><button class="mini" id="admin-refresh" type="button">רענון</button> <button class="mini" id="admin-logout" type="button">יציאה ממסך המנהל</button></span></div>
+      <div class="table-wrap"><table class="admin-table">
+        <thead><tr><th>מקום</th><th>שם</th><th>נקודות</th><th>משחקים</th><th>תשובות נכונות</th><th>שיא במשחק</th><th>שיחק לאחרונה</th><th>פעולות</th></tr></thead>
+        <tbody id="admin-rows"></tbody>
+      </table></div>
+    </div>
+    <p class="acct-msg" id="admin-msg" role="status" aria-live="polite"></p>
+  </section>
+</div>
+
+<script>
+// השאלות והתשובות הנכונות מועתקות מהמסמך "דף שאלות ותשובות על פשט המשניות – מסכת תענית פרק א'" כלשונן.
+// w = שלוש תשובות לא נכונות, בהקשר לשאלה.
+const MISHNAYOT = ["משנה א'", "משנה ב'", "משנה ג'", "משנה ד'", "משנה ה'", "משנה ו'", "משנה ז'"];
+const QUESTIONS = [
+  // משנה א'
+  { m: 0, q: 'באיזו שאלה הלכתית פותחת המשנה?',
+    a: 'המשנה פותחת בשאלה: "מאימתי מזכירין גבורות גשמים?".',
+    w: ['המשנה פותחת בשאלה: "מאימתי שואלין את הגשמים?".', 'המשנה פותחת בשאלה: "עד מתי מזכירין גבורות גשמים?".', 'המשנה פותחת בשאלה: "מאימתי מתענין על הגשמים?".'] },
+  { m: 0, q: 'מהי דעתו של רבי אליעזר לגבי תאריך תחילת הזכרת גבורות גשמים?',
+    a: 'רבי אליעזר אומר שמזכירים "מיום טוב הראשון של חג".',
+    w: ['רבי אליעזר אומר שמזכירים "מיום טוב האחרון של חג".', 'רבי אליעזר אומר שמזכירים "מראש השנה".', 'רבי אליעזר אומר שמזכירים "מיום הכיפורים".'] },
+  { m: 0, q: 'מהי דעתו של רבי יהושע לגבי תאריך תחילת הזכרת גבורות גשמים?',
+    a: 'רבי יהושע אומר שמזכירים "מיום טוב האחרון של חג".',
+    w: ['רבי יהושע אומר שמזכירים "מיום טוב הראשון של חג".', 'רבי יהושע אומר שמזכירים "מהושענא רבה".', 'רבי יהושע אומר שמזכירים "בשלושה במרחשון".'] },
+  { m: 0, q: 'מה טוען רבי יהושע כנגד דעתו של רבי אליעזר?',
+    a: 'רבי יהושע אומר: "הואיל ואין הגשמים אלא סימן קללה בחג, למה מזכיר?".',
+    w: ['רבי יהושע אומר: "אין מזכירין אלא סמוך לגשמים, וזמן הגשמים מתחיל במרחשון".', 'רבי יהושע אומר: "אין מזכירין גבורות גשמים ביום טוב כלל".', 'רבי יהושע אומר: "הואיל ובחג יושבים בסוכה, יש לשאול את הגשמים ולא להזכיר".'] },
+  { m: 0, q: 'כיצד משיב רבי אליעזר לטענת רבי יהושע, ומה משיב על כך רבי יהושע בחזרה?',
+    a: 'רבי אליעזר משיב: "אף אני לא אמרתי לשאול, אלא להזכיר – משיב הרוח ומוריד הגשם בעונתו". רבי יהושע משיב לו על כך: "אם כן, לעולם יהא מזכיר".',
+    w: ['רבי אליעזר משיב: "אף אני לא אמרתי להזכיר, אלא לשאול – ותן טל ומטר". רבי יהושע משיב לו על כך: "אם כן, לעולם יהא שואל".', 'רבי אליעזר משיב: "הגשמים בחג סימן ברכה הם". רבי יהושע משיב לו על כך: "אם כן, יתחיל לשאול כבר בחג".', 'רבי אליעזר משיב: "מודה אני לך". רבי יהושע משיב לו על כך: "אם כן, נזכיר מיום טוב האחרון של חג".'] },
+  // משנה ב'
+  { m: 1, q: 'מהו הכלל הבסיסי שקובעת המשנה בפתיחתה לגבי שאלת הגשמים?',
+    a: '"אין שואלין את הגשמים אלא סמוך לגשמים".',
+    w: ['"אין מזכירין גבורות גשמים אלא סמוך לגשמים".', '"שואלין את הגשמים כל ימות השנה".', '"אין שואלין את הגשמים אלא בתענית ציבור".'] },
+  { m: 1, q: 'לפי רבי יהודה, כיצד נוהג שליח הציבור ("העובר לפני התיבה") ביום טוב האחרון של חג?',
+    a: 'ביום טוב האחרון של חג – האחרון (שליח ציבור של מוסף) מזכיר, והראשון (שליח ציבור של שחרית) אינו מזכיר.',
+    w: ['ביום טוב האחרון של חג – הראשון (שליח ציבור של שחרית) מזכיר, והאחרון (שליח ציבור של מוסף) אינו מזכיר.', 'ביום טוב האחרון של חג – שניהם מזכירים, הראשון (שליח ציבור של שחרית) והאחרון (שליח ציבור של מוסף).', 'ביום טוב האחרון של חג – שניהם אינם מזכירים, ומתחילים להזכיר רק למחרת.'] },
+  { m: 1, q: 'לפי רבי יהודה, כיצד נוהג שליח הציבור ביום טוב הראשון של פסח?',
+    a: 'ביום טוב הראשון של פסח – הראשון (שליח ציבור של שחרית) מזכיר, והאחרון (שליח ציבור של מוסף) אינו מזכיר.',
+    w: ['ביום טוב הראשון של פסח – האחרון (שליח ציבור של מוסף) מזכיר, והראשון (שליח ציבור של שחרית) אינו מזכיר.', 'ביום טוב הראשון של פסח – שניהם מזכירים, הראשון (שליח ציבור של שחרית) והאחרון (שליח ציבור של מוסף).', 'ביום טוב הראשון של פסח – שניהם אינם מזכירים כלל.'] },
+  { m: 1, q: 'עד מתי שואלים את הגשמים לפי רבי יהודה ולפי רבי מאיר?',
+    a: 'רבי יהודה אומר: "עד שיעבור הפסח". רבי מאיר אומר: "עד שייצא ניסן".',
+    w: ['רבי יהודה אומר: "עד שייצא ניסן". רבי מאיר אומר: "עד שיעבור הפסח".', 'רבי יהודה אומר: "עד ראש חודש ניסן". רבי מאיר אומר: "עד שיעבור הפסח".', 'רבי יהודה אומר: "עד שיעבור הפסח". רבי מאיר אומר: "עד העצרת".'] },
+  { m: 1, q: 'מהו המקור המקראי שמביא רבי מאיר לביסוס דעתו?',
+    a: 'שנאמר (יואל ב\'): "וַיּוֹרֶד לָכֶם גֶּשֶׁם מוֹרֶה וּמַלְקוֹשׁ בָּרִאשׁוֹן".',
+    w: ['שנאמר (שמואל א\' י"ב): "הֲלוֹא קְצִיר חִטִּים הַיּוֹם".', 'שנאמר (דברים י"א): "וְנָתַתִּי מְטַר אַרְצְכֶם בְּעִתּוֹ יוֹרֶה וּמַלְקוֹשׁ".', 'שנאמר (ויקרא כ"ו): "וְנָתַתִּי גִשְׁמֵיכֶם בְּעִתָּם".'] },
+  // משנה ג'
+  { m: 2, q: 'באיזה תאריך מתחילים לשאול את הגשמים לפי הדעה הראשונה (תנא קמא) במשנה?',
+    a: '"בשלושה במרחשון שואלין את הגשמים".',
+    w: ['"בשבעה במרחשון שואלין את הגשמים".', '"בשבעה עשר במרחשון שואלין את הגשמים".', '"בראש חודש כסלו שואלין את הגשמים".'] },
+  { m: 2, q: 'באיזה תאריך מתחילים לשאול את הגשמים לפי רבן גמליאל?',
+    a: 'רבן גמליאל אומר: "בשבעה בו" (בז\' במרחשון).',
+    w: ['רבן גמליאל אומר: "בשלושה בו" (בג\' במרחשון).', 'רבן גמליאל אומר: "בשבעה עשר בו" (בי"ז במרחשון).', 'רבן גמליאל אומר: "בראש חודש כסלו".'] },
+  { m: 2, q: 'כמה ימים חולפים מסיום החג ועד לתאריך שקבע רבן גמליאל?',
+    a: '"חמישה עשר יום אחר החג".',
+    w: ['"שבעה ימים אחר החג".', '"שלושה ימים אחר החג".', '"שלושים יום אחר החג".'] },
+  { m: 2, q: 'מהו הטעם שנותן רבן גמליאל לדחיית שאלת הגשמים לז\' במרחשון?',
+    a: '"כדי שיגיע אחרון שבישראל לנהר פרת".',
+    w: ['"כדי שיגיע אחרון שבישראל לירושלים".', '"כדי שיספיקו לאסוף את התבואה מן השדות".', '"כדי שלא ירדו גשמים על הסוכות".'] },
+  { m: 2, q: 'מהו הנושא המרכזי שבו עוסקת משנה ג\'?',
+    a: 'התאריך המדויק בחודש מרחשון שבו מתחילים לבקש ("לשאול") את ירידת הגשמים בתפילה.',
+    w: ['התאריך שבו מתחילים להזכיר גבורות גשמים ("משיב הרוח ומוריד הגשם") בתפילה.', 'סדר התעניות שגוזרים בית דין כשלא ירדו גשמים.', 'הדינים של עולי הרגלים בדרכם חזרה מירושלים.'] },
+  // משנה ד'
+  { m: 3, q: 'מה קורה אם הגיע שבעה עשר במרחשון ולא ירדו גשמים?',
+    a: '"התחילו היחידים מתענין שלש תעניות".',
+    w: ['"בית דין גוזרין שלש תעניות על הציבור".', '"התחילו היחידים מתענין שבע תעניות".', '"ממעטין במשא ומתן, בבניין ובנטיעה".'] },
+  { m: 3, q: 'מי הם האנשים שמתחילים להתענות בתאריך י"ז במרחשון לפי פשט המשנה?',
+    a: '"היחידים".',
+    w: ['"הציבור".', '"בית דין".', '"הכוהנים".'] },
+  { m: 3, q: 'מהם הדינים לגבי אכילה ושתייה בתעניות אלו של היחידים?',
+    a: '"אוכלין ושותין משחשכה".',
+    w: ['"אוכלין ושותין מבעוד יום".', '"אוכלין ושותין עד חצות הלילה".', '"אסורין באכילה ובשתייה שלושה ימים רצופים".'] },
+  { m: 3, q: 'אילו חמישה דברים מותרים בעשייה בתעניות אלו לפי המשנה?',
+    a: 'מותרין במלאכה, ברחיצה, בסיכה, בנעילת הסנדל, ובתשמיש המיטה.',
+    w: ['מותרין באכילה, בשתייה, במלאכה, ברחיצה, ובסיכה.', 'מותרין במשא ומתן, בבניין, בנטיעה, באירוסין, ובנישואין.', 'מותרין במלאכה ובמשא ומתן, ואסורין ברחיצה, בסיכה, ובנעילת הסנדל.'] },
+  { m: 3, q: 'כמה תעניות מתענים היחידים בשלב זה?',
+    a: 'שלוש תעניות.',
+    w: ['שבע תעניות.', 'שלוש עשרה תעניות.', 'תענית אחת.'] },
+  // משנה ה'
+  { m: 4, q: 'מה גוזרים בית דין אם הגיע ראש חודש כסלו ולא ירדו גשמים?',
+    a: '"בית דין גוזרין שלש תעניות על הציבור".',
+    w: ['"התחילו היחידים מתענין שלש תעניות".', '"בית דין גוזרין שבע תעניות על הציבור".', '"ממעטין במשא ומתן, בבניין ובנטיעה".'] },
+  { m: 4, q: 'על מי מוטלת החובה להתענות החל מראש חודש כסלו, ומי קובע זאת?',
+    a: 'בית דין גוזרים את התענית על כל "הציבור".',
+    w: ['"היחידים" מחליטים בעצמם להתענות.', 'בית דין גוזרים את התענית על "היחידים" בלבד.', 'שליח הציבור קובע את התענית לבני הקהל שלו.'] },
+  { m: 4, q: 'מתי אוכלים ושותים בשלוש תעניות הציבור המוזכרות במשנה ה\'?',
+    a: '"אוכלין ושותין משחשכה".',
+    w: ['"אוכלין ושותין מבעוד יום".', '"אוכלין ושותין עד חצות הלילה".', '"אסורין באכילה ובשתייה מן הערב ועד הערב".'] },
+  { m: 4, q: 'אילו דברים מותרים בעשייה בשלוש תעניות ציבור אלו?',
+    a: 'מותרין במלאכה, ברחיצה, בסיכה, בנעילת הסנדל, ובתשמיש המיטה.',
+    w: ['אסורין במלאכה, ברחיצה, בסיכה, בנעילת הסנדל, ובתשמיש המיטה.', 'מותרין במלאכה בלבד, ואסורין ברחיצה, בסיכה, ובנעילת הסנדל.', 'מותרין במשא ומתן, בבניין, ובנטיעה בלבד.'] },
+  { m: 4, q: 'במה שונה זהות המתענים במשנה ה\' מזהות המתענים במשנה ד\'?',
+    a: 'במשנה ד\' מתענים "היחידים", ואילו במשנה ה\' בית דין גוזרים תענית על "הציבור".',
+    w: ['במשנה ד\' בית דין גוזרים תענית על "הציבור", ואילו במשנה ה\' מתענים "היחידים".', 'אין הבדל – בשתי המשניות בית דין גוזרים תענית על "הציבור".', 'במשנה ד\' מתענים "הכוהנים", ואילו במשנה ה\' מתענים "היחידים".'] },
+  // משנה ו'
+  { m: 5, q: 'מה גוזרים בית דין אם עברו שלוש תעניות הציבור הראשונות ולא נענו?',
+    a: '"בית דין גוזרין שלש תעניות אחרות על הציבור".',
+    w: ['"בית דין גוזרין שבע תעניות אחרות על הציבור".', '"היחידים חוזרים ומתענים עד שייצא ניסן".', '"ממעטין במשא ומתן, בבניין ובנטיעה".'] },
+  { m: 5, q: 'מתי אוכלים ושותים בשלוש התעניות השניות?',
+    a: '"אוכלין ושותין מבעוד יום".',
+    w: ['"אוכלין ושותין משחשכה".', '"אוכלין ושותין עד חצות הלילה".', '"אוכלין ושותין עד עלות השחר".'] },
+  { m: 5, q: 'אילו דברים אסורים בעשייה בשלוש התעניות השניות?',
+    a: 'אסורין במלאכה, ברחיצה, בסיכה, בנעילת הסנדל, ובתשמיש המיטה, ונועלין את המרחצאות.',
+    w: ['מותרין במלאכה, ברחיצה, בסיכה, בנעילת הסנדל, ובתשמיש המיטה.', 'אסורין במשא ומתן, בבניין, ובנטיעה, ונועלין את החנויות.', 'אסורין באכילה ובשתייה בלבד, ומותרין בשאר הדברים.'] },
+  { m: 5, q: 'כמה תעניות נוספות גוזרים בית דין אם עברו גם שלוש התעניות השניות ולא נענו, ולאיזה סך כולל מגיעים?',
+    a: 'בית דין גוזרים עוד שבע תעניות, שהן בסך הכל שלוש עשרה תעניות על הציבור.',
+    w: ['בית דין גוזרים עוד שלוש תעניות, שהן בסך הכל תשע תעניות על הציבור.', 'בית דין גוזרים עוד שבע תעניות, שהן בסך הכל עשר תעניות על הציבור.', 'בית דין גוזרים עוד עשר תעניות, שהן בסך הכל שש עשרה תעניות על הציבור.'] },
+  { m: 5, q: 'במה יתרות (חמורות יותר) שבע התעניות האחרונות על התעניות שקדמו להן?',
+    a: '"שבאלו מתריעין ונועלין את החנויות".',
+    w: ['"שבאלו אוכלין ושותין מבעוד יום".', '"שבאלו נועלין את המרחצאות".', '"שבאלו ממעטין באירוסין ובנישואין".'] },
+  { m: 5, q: 'כיצד נוהגים בפתיחת החנויות ביום שני וביום חמישי בשבע התעניות האחרונות, ומדוע?',
+    a: '"בשני מטין עם חשכה, ובחמישי מותרין מפני כבוד השבת".',
+    w: ['"בשני מותרין מפני כבוד השבת, ובחמישי מטין עם חשכה".', '"בשני ובחמישי נועלין את החנויות כל היום".', '"בשני ובחמישי פותחין את החנויות כדרכן, מפני צורכי הציבור".'] },
+  // משנה ז'
+  { m: 6, q: 'באילו שישה תחומים ממעטים העם אם עברו כל שלוש עשרה התעניות ולא נענו?',
+    a: 'ממעטין במשא ומתן, בבניין, ובנטיעה, באירוסין, ובנישואין, ובשאילת שלום בין אדם לחברו.',
+    w: ['ממעטין במלאכה, ברחיצה, ובסיכה, בנעילת הסנדל, ובתשמיש המיטה, ובשאילת שלום בין אדם לחברו.', 'ממעטין במשא ומתן, בבניין, ובנטיעה, ונועלין את המרחצאות, את החנויות, ואת השווקים.', 'ממעטין בשמחה, במשתאות, ובבגדים חדשים, בתספורת, ובכביסה, ובטיולים.'] },
+  { m: 6, q: 'כיצד מתארת המשנה את מעמדם והרגשתם של בני האדם בשלב זה?',
+    a: '"כבני אדם הנזופין למקום".',
+    w: ['"כבני אדם השמחים לפני המקום".', '"כאבלים היושבים על מתם".', '"כעבדים המשמשים את הרב על מנת לקבל פרס".'] },
+  { m: 6, q: 'מה עושים היחידים לאחר שהסתיימו תעניות הציבור ולא ירדו גשמים, ועד איזה שלב?',
+    a: '"היחידים חוזרים ומתענים עד שייצא ניסן".',
+    w: ['"היחידים חוזרים ומתענים עד שיעבור הפסח".', '"היחידים חוזרים ומתענים עד ראש חודש אדר".', '"בית דין גוזרין שלש תעניות אחרות על הציבור".'] },
+  { m: 6, q: 'מהו הדין אם יצא חודש ניסן ואז ירדו גשמים?',
+    a: '"סימן קללה".',
+    w: ['"סימן ברכה".', '"סימן שנתקבלה התענית".', '"סימן לשנה שחונה".'] },
+  { m: 6, q: 'מהו הפסוק שמביאה המשנה להוכיח שגשם לאחר ניסן הוא סימן קללה?',
+    a: 'שנאמר (שמואל א\' י"ב): "הֲלוֹא קְצִיר חִטִּים הַיּוֹם" וגו\'.',
+    w: ['שנאמר (יואל ב\'): "וַיּוֹרֶד לָכֶם גֶּשֶׁם מוֹרֶה וּמַלְקוֹשׁ בָּרִאשׁוֹן".', 'שנאמר (דברים י"א): "וְעָצַר אֶת הַשָּׁמַיִם וְלֹא יִהְיֶה מָטָר" וגו\'.', 'שנאמר (מלכים א\' י"ז): "אִם יִהְיֶה הַשָּׁנִים הָאֵלֶּה טַל וּמָטָר" וגו\'.'] }
+];
+
+// המושגים מהעמוד האחרון: t = המושג, a = ההגדרה כלשונה במסמך
+const CONCEPTS = [
+  { t: 'גבורות גשמים', a: 'הזכרת שבחו של הקב"ה כמוריד הגשם בתפילה ("משיב הרוח ומוריד הגשם").',
+    w: ['הבקשה המפורשת בתפילה לירידת גשמים ("ותן טל ומטר").', 'כינויים לגשמים (מורה – גשם ראשון; מלקוש – גשם מאוחר).', 'תקיעה בשופרות וזעקה בתפילה בשבע התעניות האחרונות.'] },
+  { t: 'שאלת גשמים', a: 'הבקשה המפורשת בתפילה לירידת גשמים ("ותן טל ומטר").',
+    w: ['הזכרת שבחו של הקב"ה כמוריד הגשם בתפילה ("משיב הרוח ומוריד הגשם").', 'תקיעה בשופרות וזעקה בתפילה בשבע התעניות האחרונות.', 'כינויים לגשמים (מורה – גשם ראשון; מלקוש – גשם מאוחר).'] },
+  { t: 'החג', a: 'חג הסוכות.',
+    w: ['חג הפסח.', 'חג השבועות.', 'ראש השנה.'] },
+  { t: 'העובר לפני התיבה', a: 'שליח הציבור (החזן) המתפלל לפני התיבה.',
+    w: ['הכהן המברך את העם בבית המקדש.', 'האדם התוקע בשופר בשבע התעניות האחרונות.', 'האנשים החשובים/תלמידי החכמים שמתחילים להתענות ראשונים בי"ז במרחשון.'] },
+  { t: 'מורה ומלקוש', a: 'כינויים לגשמים (מורה – גשם ראשון; מלקוש – גשם מאוחר).',
+    w: ['כינויים לגשמים (מורה – גשם מאוחר; מלקוש – גשם ראשון).', 'כינויים לטל (מורה – טל של בוקר; מלקוש – טל של ערב).', 'שמות של שני חודשי הגשמים (מורה – מרחשון; מלקוש – כסלו).'] },
+  { t: 'נהר פרת', a: 'הגבול הגאוגרפי הצפוני שאליו צריכים להגיע אחרוני עולי הרגלים בחזרתם לביתם.',
+    w: ['הגבול הגאוגרפי הדרומי שאליו צריכים להגיע אחרוני עולי הרגלים בחזרתם לביתם.', 'המקום שבו נאספים עולי הרגלים בדרכם לירושלים לפני החג.', 'המקום שאליו יוצאים להתפלל על הגשמים בשבע התעניות האחרונות.'] },
+  { t: 'היחידים', a: 'האנשים החשובים/תלמידי החכמים שמתחילים להתענות ראשונים בי"ז במרחשון.',
+    w: ['כל הציבור, שבית דין גוזרים עליו להתענות מראש חודש כסלו.', 'שליח הציבור (החזן) המתפלל לפני התיבה.', 'האנשים שאינם חייבים להתענות בעת בצורת.'] },
+  { t: 'אוכלין ושותין משחשכה', a: 'דין בתעניות הקלות, שבו מותר לאכול ולשות בלילה שלפני התענית.',
+    w: ['דין בתעניות החמורות, שבו איסור האכילה והשתייה מתחיל כבר מבעוד יום בערב שלפני הצום.', 'דין בתעניות הקלות, שבו אסור לאכול ולשתות מרגע שמחשיך.', 'דין בתעניות החמורות, שבו מותר לאכול ולשתות רק לאחר צאת הכוכבים בסוף התענית.'] },
+  { t: 'אוכלין ושותין מבעוד יום', a: 'דין בתעניות החמורות, שבו איסור האכילה והשתייה מתחיל כבר מבעוד יום בערב שלפני הצום.',
+    w: ['דין בתעניות הקלות, שבו מותר לאכול ולשות בלילה שלפני התענית.', 'דין בתעניות הקלות, שבו מפסיקים לאכול רק עם עלות השחר.', 'דין בתעניות החמורות, שבו מותר לאכול ולשתות עד חצות הלילה.'] },
+  { t: 'חמשת העינויים (מותרים/אסורים)', a: 'מלאכה, רחיצה, סיכה, נעילת הסנדל ותשמיש המיטה.',
+    w: ['משא ומתן, בניין, נטיעה, אירוסין ונישואין.', 'אכילה, שתייה, מלאכה, רחיצה וסיכה.', 'תקיעה בשופרות, זעקה, נעילת החנויות, נעילת המרחצאות ומיעוט בשמחה.'] },
+  { t: 'שלוש עשרה תעניות', a: 'מניין כלל תעניות הציבור הנגזרות על ידי בית דין בעת בצורת (3 קלות + 3 חמורות + 7 חמורות ביותר).',
+    w: ['מניין כלל תעניות הציבור הנגזרות על ידי בית דין בעת בצורת (3 קלות + 7 חמורות + 3 חמורות ביותר).', 'מניין התעניות שהיחידים מתענים מי"ז במרחשון ועד שייצא ניסן.', 'מניין הימים שבין שלושה במרחשון לשבעה עשר במרחשון.'] },
+  { t: 'מתריעין', a: 'תקיעה בשופרות וזעקה בתפילה בשבע התעניות האחרונות.',
+    w: ['פתיחה חלקית ומוטה של החנויות לעת ערב ביום שני בשבע התעניות האחרונות.', 'נעילת המרחצאות בשלוש התעניות השניות.', 'הבקשה המפורשת בתפילה לירידת גשמים ("ותן טל ומטר").'] },
+  { t: 'מטין עם חשכה', a: 'פתיחה חלקית ומוטה של החנויות לעת ערב ביום שני בשבע התעניות האחרונות.',
+    w: ['הטעם שבשלו מותר לפתוח חנויות ביום חמישי בשבע התעניות האחרונות.', 'נעילה מלאה של החנויות ביום שני וביום חמישי בשבע התעניות האחרונות.', 'הפסקת האכילה והשתייה עם רדת החשכה בערב התענית.'] },
+  { t: 'מפני כבוד השבת', a: 'הטעם שבשלו מותר לפתוח חנויות ביום חמישי בשבע התעניות האחרונות.',
+    w: ['פתיחה חלקית ומוטה של החנויות לעת ערב ביום שני בשבע התעניות האחרונות.', 'הטעם שבשלו אין גוזרים תענית ציבור ביום שישי.', 'הטעם שבשלו נועלים את המרחצאות בשלוש התעניות השניות.'] },
+  { t: 'כבני אדם הנזופין למקום', a: 'ההגדרה למצבם הרוחני והנפשי של העם כאשר לא ירדו גשמים גם לאחר 13 תעניות ציבור.',
+    w: ['ירידת גשמים לאחר שייצא חודש ניסן (בזמן הקציר).', 'ההגדרה למצבם של היחידים המתענים לבדם בי"ז במרחשון.', 'ההגדרה לשמחת העם כאשר ירדו גשמים לאחר התעניות.'] },
+  { t: 'סימן קללה', a: 'ירידת גשמים לאחר שייצא חודש ניסן (בזמן הקציר).',
+    w: ['ההגדרה למצבם הרוחני והנפשי של העם כאשר לא ירדו גשמים גם לאחר 13 תעניות ציבור.', 'עצירת גשמים בחודש מרחשון, לפני שאלת הגשמים.', 'ירידת גשמים מרובים בחודש כסלו, לאחר תעניות הציבור.'] }
+];
+// כל הפריטים ברשימה אחת: 0–35 שאלות, 36–51 מושגים
+const ITEMS = QUESTIONS.map(x => ({ kind: 'q', label: MISHNAYOT[x.m], q: x.q, a: x.a, w: x.w }))
+  .concat(CONCEPTS.map(c => ({ kind: 'c', label: 'מושג', q: `מה פירוש המושג "${c.t}"?`, a: c.a, w: c.w })));
+
+const $ = id => document.getElementById(id);
+const KEY = 'taanit1-game-v1';
+const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const NQ = 25, NC = 7;
+
+// לוח הזמנים של הפרק: כל תחנה מתמלאת בגשם בהתקדמות בסבב
+const STATIONS = [
+  { d: 'יום טוב האחרון של חג', t: 'מזכירין גבורות גשמים (לדעת רבי יהושע)' },
+  { d: 'ג\' במרחשון', t: 'שואלין את הגשמים (תנא קמא)' },
+  { d: 'ז\' במרחשון', t: 'שואלין את הגשמים (רבן גמליאל)' },
+  { d: 'י"ז במרחשון', t: 'היחידים מתענין שלש תעניות' },
+  { d: 'ראש חודש כסלו', t: 'שלש תעניות על הציבור' },
+  { d: 'אחריהן', t: 'שלש תעניות אחרות – אוכלין ושותין מבעוד יום' },
+  { d: 'אחריהן', t: 'שבע תעניות – מתריעין ונועלין את החנויות' },
+  { d: 'עד שייצא ניסן', t: 'ממעטין, והיחידים חוזרים ומתענים' }
+];
+
+// state: order = item indexes for this round; opts = option order (0 = the right answer)
+let S = null;
+
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)); } catch(e){ return null; } }
+function clearSave(){ try { localStorage.removeItem(KEY); } catch(e){} }
+
+function show(id){ ['start','quiz','end','admin'].forEach(s => $(s).hidden = s !== id); document.body.classList.toggle('in-quiz', id === 'quiz'); window.scrollTo({top:0}); }
+
+// בכל סבב: 25 שאלות ו־7 מושגים, קודם כאלה שעוד לא הופיעו במכשיר הזה
+function pickFresh(pool, n, seenKey){
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(seenKey)) || []; } catch(e){}
+  seen = seen.filter(k => pool.includes(k));
+  const unseen = pool.filter(k => !seen.includes(k));
+  let pick;
+  if (unseen.length >= n) { pick = shuffle(unseen).slice(0, n); seen = seen.concat(pick); }
+  else { pick = unseen.concat(shuffle(seen).slice(0, n - unseen.length)); seen = pick.slice(); }
+  try { localStorage.setItem(seenKey, JSON.stringify(seen)); } catch(e){}
+  return pick;
+}
+function buildRound(){
+  const qs = pickFresh(ITEMS.map((x, k) => k).filter(k => ITEMS[k].kind === 'q'), NQ, 'taanit1-seen-q').sort((a, b) => a - b);
+  const cs = pickFresh(ITEMS.map((x, k) => k).filter(k => ITEMS[k].kind === 'c'), NC, 'taanit1-seen-c');
+  return qs.concat(cs);
+}
+
+function newRound(indexes, kind){
+  S = { kind: kind || 'round', order: indexes, i: 0, pts: 0, streak: 0, best: 0, correct: 0, wrong: [], answered: null, opts: null };
+  loadQuestion();
+  show('quiz');
+}
+
+function loadQuestion(){
+  if (!S.opts) S.opts = shuffle([0, 1, 2, 3]);
+  const it = ITEMS[S.order[S.i]];
+  const texts = [it.a].concat(it.w);
+  $('prog').textContent = `שאלה ${S.i + 1} מתוך ${S.order.length}`;
+  $('qlabel').textContent = it.kind === 'c' ? 'מושגי יסוד' : it.label;
+  $('qlabel').className = 'qlabel' + (it.kind === 'c' ? ' concept' : '');
+  $('qtext').textContent = it.q;
+  $('pts').textContent = S.pts; $('streak').textContent = S.streak;
+  $('fb').textContent = ''; $('fb').className = 'fb';
+  $('next-btn').hidden = true;
+  const ul = $('opts'); ul.innerHTML = '';
+  S.opts.forEach((oi, n) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.className = 'opt'; b.dataset.oi = oi;
+    b.innerHTML = `<span class="k">${n + 1}</span><span class="t"></span>`;
+    b.querySelector('.t').textContent = texts[oi];
+    b.onclick = () => answer(oi);
+    li.appendChild(b); ul.appendChild(li);
+  });
+  updateTrack();
+  if (S.answered !== null) paintAnswer(S.answered, false);
+  save();
+}
+
+function answer(oi){
+  if (S.answered !== null) return;
+  S.answered = oi;
+  if (oi === 0) {
+    S.correct++; S.streak++; S.best = Math.max(S.best, S.streak);
+    S.pts += 10 + Math.min(S.streak - 1, 5) * 2;
+  } else {
+    S.streak = 0; S.wrong.push(S.order[S.i]);
+  }
+  paintAnswer(oi, true);
+  updateTrack();
+  save();
+}
+
+function paintAnswer(oi, animate){
+  document.querySelectorAll('.opt').forEach(b => {
+    b.disabled = true;
+    const v = +b.dataset.oi;
+    if (v === 0) b.classList.add('right');
+    else if (v === oi) b.classList.add('wrong');
+    else b.classList.add('dim');
+    if (animate && (v === 0 || v === oi)) b.classList.add('pop');
+  });
+  const fb = $('fb');
+  if (oi === 0) { fb.textContent = 'כל הכבוד! תשובה נכונה'; fb.className = 'fb good'; }
+  else { fb.textContent = 'טעות. התשובה הנכונה מסומנת בירוק.'; fb.className = 'fb bad'; }
+  $('pts').textContent = S.pts; $('streak').textContent = S.streak;
+  const nb = $('next-btn');
+  nb.textContent = S.i + 1 < S.order.length ? 'לשאלה הבאה' : 'לסיום';
+  nb.hidden = false;
+  if (animate) nb.focus({preventScroll:true});
+}
+
+function next(){
+  S.i++; S.answered = null; S.opts = null;
+  if (S.i < S.order.length) loadQuestion();
+  else finish();
+}
+
+function buildTrack(){
+  $('track').innerHTML = STATIONS.map(s => `<li title="${s.d}: ${s.t}"><i></i><span>${s.d}</span></li>`).join('');
+  $('timeline').innerHTML = STATIONS.map(s => `<li><b>${s.d}</b><span>${s.t}</span></li>`).join('');
+}
+function updateTrack(){
+  const done = S ? S.i + (S.answered !== null ? 1 : 0) : 0;
+  const n = S ? Math.floor(done / S.order.length * STATIONS.length + 1e-9) : 0;
+  document.querySelectorAll('#track li').forEach((el, k) => el.classList.toggle('on', k < n));
+  $('track').style.setProperty('--fill', S ? (done / S.order.length * 100) + '%' : '0%');
+}
+
+function finish(){
+  const n = S.order.length, c = S.correct;
+  const ratio = c / n;
+  const stars = ratio >= .9 ? 3 : ratio >= .7 ? 2 : ratio >= .4 ? 1 : 0;
+  $('stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  $('final').textContent = `${c} מתוך ${n}`;
+  $('final-line').textContent = `צברת ${S.pts} נקודות. הרצף הארוך ביותר: ${S.best} תשובות נכונות ברצף.`;
+  $('well-water').style.setProperty('--level', Math.round(ratio * 100) + '%');
+  $('well-cap').textContent = `הבור התמלא ב־${Math.round(ratio * 100)}% – כמו אחוז התשובות הנכונות שלך.`;
+  updateTrack();
+  const list = $('review-list'); list.innerHTML = '';
+  S.wrong.forEach(k => {
+    const it = ITEMS[k];
+    const d = document.createElement('details');
+    const s = document.createElement('summary'); s.textContent = `${it.kind === 'c' ? 'מושג' : it.label} · ${it.q}`;
+    const p = document.createElement('p'); p.textContent = it.a;
+    d.append(s, p); list.appendChild(d);
+  });
+  $('review').hidden = S.wrong.length === 0;
+  $('mistakes-btn').hidden = S.wrong.length === 0;
+  S.finished = true; save();
+  show('end');
+  submitScore();
+}
+
+function initStart(){
+  const saved = load();
+  $('resume-btn').hidden = $('resume-line').hidden = true;
+  if (saved && !saved.finished && Array.isArray(saved.order) && saved.i < saved.order.length) {
+    $('resume-btn').hidden = false; $('resume-line').hidden = false;
+    $('resume-line').textContent = `נשמר משחק באמצע: שאלה ${saved.i + 1} מתוך ${saved.order.length}.`;
+  }
+  show('start');
+}
+
+// משתמשים, טבלת האלופים ומסך המנהל. כשאין שרת (למשל בקובץ מקומי) המשחק עובד במצב אורח.
+const ME_KEY = 'taanit1-me-v1';
+let online = false, me = null, adminCode = null;
+
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+async function api(route, body){
+  const r = await fetch('/api/' + route, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
+  let data = {};
+  try { data = await r.json(); } catch(e){ throw new Error('השרת לא זמין כרגע.'); }
+  if (!r.ok) { const e = new Error(data.error || 'משהו השתבש. נסו שוב.'); e.status = r.status; throw e; }
+  return data;
+}
+function saveMe(){ try { me ? localStorage.setItem(ME_KEY, JSON.stringify({ name: me.name, token: me.token })) : localStorage.removeItem(ME_KEY); } catch(e){} }
+
+function renderAccount(){
+  $('account').hidden = !online;
+  $('admin-link').hidden = !online;
+  $('acct-out').hidden = !!me; $('acct-in').hidden = !me;
+  if (me) { $('me-name').textContent = me.name; $('me-total').textContent = me.total ?? 0; }
+}
+
+async function loadBoard(){
+  if (!online) return;
+  try {
+    const d = await api('top');
+    document.querySelectorAll('[data-board]').forEach(el => {
+      el.hidden = false;
+      const rows = d.top.map((u, i) => `<li class="${me && u.name === me.name ? 'mine' : ''}"><span class="pl">${i + 1}</span><span class="nm">${esc(u.name)}</span><span class="pt">${u.total}</span></li>`).join('');
+      el.querySelector('ol').innerHTML = rows || '<li class="empty">עוד אין שחקנים בטבלה. היו הראשונים!</li>';
+      el.querySelector('.board-sub').textContent = d.players > 10 ? `מתוך ${d.players} שחקנים` : '';
+    });
+  } catch(e){}
+}
+
+async function initAccounts(){
+  try { await api('top'); online = true; } catch(e){ online = false; }
+  if (online) {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(ME_KEY)); } catch(e){}
+    if (saved && saved.name && saved.token) {
+      try { me = { ...saved, ...(await api('me', saved)) }; }
+      catch(e){ me = (e.status === 401 || e.status === 404) ? null : { ...saved }; saveMe(); }
+    }
+  }
+  renderAccount();
+  loadBoard();
+}
+
+async function submitAccount(e){
+  e.preventDefault();
+  const name = $('acct-name').value.trim().replace(/\s+/g, ' ');
+  const msg = $('acct-msg'); msg.className = 'acct-msg';
+  if (name.split(' ').length < 2 || name.length < 4) { msg.textContent = 'כתבו שם פרטי ושם משפחה.'; msg.classList.add('err'); return; }
+  $('acct-submit').disabled = true; msg.textContent = '...';
+  try {
+    me = await api('join', { name });
+    saveMe(); msg.textContent = ''; $('acct-name').value = '';
+    renderAccount(); loadBoard();
+  } catch(err){ msg.textContent = err.message; msg.classList.add('err'); }
+  $('acct-submit').disabled = false;
+}
+
+// נקרא בסוף כל משחק
+async function submitScore(){
+  const line = $('save-line');
+  line.className = 'save-line'; line.textContent = '';
+  if (!online) return;
+  if (!me) { line.textContent = 'שיחקת כאורח, ולכן הניקוד לא נשמר בטבלה.'; return; }
+  if (S.submitted) { line.textContent = `הניקוד נשמר. סך הכל צברת ${me.total} נקודות.`; loadBoard(); return; }
+  line.textContent = 'שומר את הניקוד...';
+  try {
+    const d = await api('score', { name: me.name, token: me.token, points: S.pts, questions: S.order.length, correct: S.correct, wrong: S.wrong, mode: S.kind || 'round' });
+    S.submitted = true; save();
+    me = { ...me, ...d }; saveMe(); renderAccount();
+    line.textContent = `הניקוד נשמר! סך הכל צברת ${d.total} נקודות.`; line.classList.add('ok');
+  } catch(err){
+    if (err.status === 401 || err.status === 404) { me = null; saveMe(); renderAccount(); }
+    line.textContent = 'הניקוד לא נשמר: ' + err.message; line.classList.add('err');
+  }
+  loadBoard();
+}
+
+function guardStart(){
+  if (online && !me) {
+    const msg = $('acct-msg');
+    msg.className = 'acct-msg err';
+    msg.textContent = 'כתבו קודם שם ושם משפחה, כדי שהניקוד יישמר.';
+    $('account').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('acct-name').focus({ preventScroll: true });
+    return false;
+  }
+  return true;
+}
+
+/* ---------- מסך המנהל ---------- */
+const fmtDate = t => t ? new Date(t).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' }) + ' ' + new Date(t).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '—';
+
+const MODE_NAMES = { round: 'סבב 25 + 7', mistakes: 'תרגול טעויות' };
+const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
+const LETTERS = 'אבגדהוז';
+// שאלה מוצגת כאות המשנה ומספר השאלה (למשל ג2), ומושג – בשמו
+const qChip = k => { const it = ITEMS[k]; if (!it) return ''; const tag = it.kind === 'c' ? CONCEPTS[k - QUESTIONS.length].t : LETTERS[QUESTIONS[k].m] + (k - QUESTIONS.findIndex(x => x.m === QUESTIONS[k].m) + 1); return `<span class="qn" title="${esc(it.label + ': ' + it.q)}">${esc(tag)}</span>`; };
+let adminUsers = [];
+
+function detailHTML(u){
+  if (!u.history.length) return '<p class="muted">עוד לא סיים אף משחק.</p>';
+  const miss = {};
+  u.history.forEach(g => (g.wrong || []).forEach(k => miss[k] = (miss[k] || 0) + 1));
+  const hard = Object.entries(miss).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, n]) => qChip(+k) + (n > 1 ? `×${n}` : '')).join(' ');
+  return (hard ? `<p class="hard"><b>שאלות שטעה בהן הכי הרבה:</b> ${hard}</p>` : '')
+    + `<div class="table-wrap"><table class="hist"><thead><tr><th>מתי</th><th>סוג משחק</th><th>נכונות</th><th>נקודות</th><th>שאלות שטעה בהן</th></tr></thead><tbody>`
+    + u.history.map(g => `<tr><td>${fmtDate(g.at)}</td><td>${MODE_NAMES[g.mode] || ''}</td><td>${g.c} / ${g.q}</td><td><b>${g.p}</b></td><td class="wr">${(g.wrong || []).map(qChip).join(' ') || '—'}</td></tr>`).join('')
+    + '</tbody></table></div><p class="muted" style="font-size:.8rem;margin-top:4px">אות ומספר = משנה ומספר השאלה בדף (למשל ג2). מעבר עם העכבר מציג את השאלה.</p>';
+}
+
+function renderAdmin(users){
+  adminUsers = users;
+  $('admin-login').hidden = true; $('admin-panel').hidden = false;
+  $('admin-count').textContent = `${users.length} שחקנים רשומים`;
+  $('admin-rows').innerHTML = users.map((u, i) => `<tr data-i="${i}">
+    <td class="num">${i + 1}</td><td>${esc(u.name)}</td><td class="num"><b>${u.total}</b></td><td class="num">${u.games}</td><td class="num">${u.right} / ${u.answered} (${pct(u.right, u.answered)})</td><td class="num">${u.best}</td><td class="num">${fmtDate(u.last)}</td>
+    <td class="acts"><button class="mini" data-act="detail" aria-expanded="false">פירוט</button> <button class="mini danger" data-act="delete">מחיקה</button></td></tr>`).join('')
+    || '<tr><td colspan="8" class="empty">עוד אין שחקנים רשומים.</td></tr>';
+}
+
+async function adminCall(body){
+  const msg = $('admin-msg'); msg.textContent = ''; msg.className = 'acct-msg';
+  try { const d = await api('admin', { code: adminCode, ...body }); renderAdmin(d.users); return true; }
+  catch(err){ msg.textContent = err.message; msg.classList.add('err'); return false; }
+}
+
+function initAdmin(){
+  $('admin-link').onclick = () => {
+    show('admin');
+    try { adminCode = sessionStorage.getItem('taanit1-admin'); } catch(e){}
+    if (adminCode) adminCall({ action: 'list' }); else { $('admin-login').hidden = false; $('admin-panel').hidden = true; $('admin-code').focus(); }
+  };
+  $('admin-back').onclick = () => { initStart(); loadBoard(); };
+  $('admin-login').onsubmit = async e => {
+    e.preventDefault();
+    adminCode = $('admin-code').value.trim();
+    if (await adminCall({ action: 'list' })) { try { sessionStorage.setItem('taanit1-admin', adminCode); } catch(e){} $('admin-code').value = ''; }
+  };
+  $('admin-logout').onclick = () => { adminCode = null; try { sessionStorage.removeItem('taanit1-admin'); } catch(e){} $('admin-panel').hidden = true; $('admin-login').hidden = false; };
+  $('admin-refresh').onclick = () => adminCall({ action: 'list' });
+  $('admin-rows').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const tr = b.closest('tr'), u = adminUsers[+tr.dataset.i];
+    if (b.dataset.act === 'detail') {
+      const open = tr.nextElementSibling && tr.nextElementSibling.classList.contains('detail-row');
+      if (open) { tr.nextElementSibling.remove(); tr.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); b.textContent = 'פירוט'; return; }
+      tr.insertAdjacentHTML('afterend', `<tr class="detail-row"><td colspan="8" class="detail">${detailHTML(u)}</td></tr>`);
+      tr.classList.add('open'); b.setAttribute('aria-expanded', 'true'); b.textContent = 'סגירה';
+    } else if (b.dataset.act === 'delete') {
+      b.textContent = 'בטוח? למחוק'; b.dataset.act = 'delete-yes';
+      setTimeout(() => { if (b.isConnected && b.dataset.act === 'delete-yes') { b.textContent = 'מחיקה'; b.dataset.act = 'delete'; } }, 4000);
+    } else if (b.dataset.act === 'delete-yes') {
+      adminCall({ action: 'delete', name: u.name });
+    }
+  };
+}
+
+
+buildTrack();
+initAdmin();
+$('acct-form').onsubmit = submitAccount;
+$('logout').onclick = () => { me = null; saveMe(); renderAccount(); loadBoard(); };
+$('start-btn').onclick = () => { if (guardStart()) newRound(buildRound(), 'round'); };
+$('resume-btn').onclick = () => { S = load(); loadQuestion(); show('quiz'); };
+$('next-btn').onclick = next;
+$('again-btn').onclick = () => { clearSave(); S = null; initStart(); loadBoard(); };
+$('mistakes-btn').onclick = () => newRound(shuffle(S.wrong), 'mistakes');
+
+document.addEventListener('keydown', e => {
+  if ($('quiz').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 4 && S.answered === null && S.opts[n - 1] !== undefined) answer(S.opts[n - 1]);
+  else if ((e.key === 'Enter' || e.key === ' ') && S.answered !== null && document.activeElement !== $('next-btn')) { e.preventDefault(); next(); }
+});
+
+function start(){ initStart(); initAccounts(); }
+window.claude?.hot?.snapshot?.(() => ({ S }));
+window.claude?.hot?.ready ? window.claude.hot.ready(d => { if (d && d.S) { S = d.S; if (S.finished) { finish(); } else { loadQuestion(); show('quiz'); } } else start(); }) : start();
+</script>
+
+</body>
+</html>
